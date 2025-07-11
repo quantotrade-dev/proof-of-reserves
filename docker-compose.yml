@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  zk-mysql:
+    image: mysql:latest
+    container_name: zk-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: zkpasswd
+      MYSQL_USER: zkroot
+      MYSQL_PASSWORD: zkpasswd
+      MYSQL_DATABASE: zkpos
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  zk-redis:
+    image: redis:latest
+    container_name: zk-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  zk-kvrocks:
+    image: apache/kvrocks
+    container_name: zk-kvrocks
+    ports:
+      - "6666:6666"
+    volumes:
+      - kvrocks_data:/var/lib/kvrocks
+    command: ["--bind", "0.0.0.0"]
+
+  zk-go-app:
+    image: zk-go-app
+    container_name: zk-go-app
+    depends_on:
+      - zk-mysql
+      - zk-redis
+      - zk-kvrocks
+    volumes:
+      - ./example_data:/app/example_data
+      - ./config:/app/config
+    environment:
+      MYSQL_DATA_SOURCE: "zkroot:zkpasswd@tcp(zk-mysql:3306)/zkpos?parseTime=true"
+      REDIS_HOST: "zk-redis:6379"
+      KVROCKS_ADDR: "zk-kvrocks:6666"
+
+volumes:
+  mysql_data:
+  redis_data:
+  kvrocks_data:
