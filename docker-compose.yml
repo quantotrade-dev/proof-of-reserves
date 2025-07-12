@@ -41,6 +41,7 @@ services:
     volumes:
       - ./example_data:/app/example_data
       - ./config:/app/config
+      - ./zkpor128.vk.save:/app/zkpor128.vk.save
     environment:
       MYSQL_DATA_SOURCE: "zkroot:zkpasswd@tcp(zk-mysql:3306)/zkpos?parseTime=true"
       REDIS_HOST: "zk-redis:6379"
